@@ -1,12 +1,18 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.3.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
 	id 'java'
+	id 'application'
+
+	id 'idea'
+
+	id 'com.google.protobuf' version '0.8.8'
 }
 
 group = 'pl.put.swolarz'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
+def grpcVersion = '1.32.1'
+def protocVersion = '3.12.0'
 
 configurations {
 	compileOnly {
@@ -19,14 +25,45 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+	implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+
+	compileOnly 'org.projectlombok:lombok:1.18.12'
+	annotationProcessor 'org.projectlombok:lombok:1.18.12'
+}
+
+application {
+	mainClassName = 'pl.put.swolarz.remotetaskcall.RemoteTaskCallApplication'
+}
+
+protobuf {
+	protoc {
+		artifact = "com.google.protobuf:protoc:${protocVersion}"
 	}
+	plugins {
+		grpc {
+			artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+		}
+	}
+
+	generateProtoTasks {
+		all()*.plugins {
+			grpc {}
+		}
+	}
+
+	generatedFilesBaseDir = "${projectDir}/build/generated/sources/proto/main"
 }
 
 test {
 	useJUnitPlatform()
+}
+
+idea {
+	module {
+		sourceDirs += file("${projectDir}/build/generated/sources/proto/main/java")
+		sourceDirs += file("${projectDir}/build/generated/sources/proto/main/grpc")
+	}
 }
