@@ -1,0 +1,42 @@
+syntax = 'proto3';
+
+option java_package = "pl.put.swolarz.remotetaskcall.generated";
+option java_multiple_files = true;
+
+package pl.put.swolarz.remotetaskcall;
+
+
+service TaskExecutionService {
+    rpc launchTask(stream TaskRequest) returns (stream TaskOutput);
+}
+
+message TaskCall {
+    string command = 1;
+}
+
+message TaskInput {
+    bytes data = 1;
+}
+
+message TaskRequest {
+    oneof RequestType {
+        TaskInput input = 1;
+        TaskCall call = 2;
+    }
+}
+
+message TaskOutput {
+    oneof OutputType {
+        StdOutput std = 1;
+        ErrOutput err = 2;
+    }
+}
+
+message StdOutput {
+    bytes data = 1;
+}
+
+message ErrOutput {
+    bytes data = 1;
+}
+
