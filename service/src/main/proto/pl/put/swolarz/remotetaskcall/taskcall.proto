@@ -7,7 +7,7 @@ package pl.put.swolarz.remotetaskcall;
 
 
 service TaskExecutionService {
-    rpc launchTask(stream TaskRequest) returns (stream TaskOutput);
+    rpc launchTask(stream TaskRequest) returns (stream TaskResult);
 }
 
 message TaskCall {
@@ -25,11 +25,16 @@ message TaskRequest {
     }
 }
 
-message TaskOutput {
+message TaskResult {
     oneof OutputType {
-        StdOutput std = 1;
-        ErrOutput err = 2;
+        Heartbeat heartbeat = 1;
+        StdOutput std = 2;
+        ErrOutput err = 3;
+        ExitStatus status = 4;
     }
+}
+
+message Heartbeat {
 }
 
 message StdOutput {
@@ -38,5 +43,9 @@ message StdOutput {
 
 message ErrOutput {
     bytes data = 1;
+}
+
+message ExitStatus {
+    int32 code = 1;
 }
 
