@@ -13,18 +13,19 @@ class TaskResponseStreamDispatcher {
         this.finalized = false;
     }
 
-    public synchronized void pushResponse() {
+    public synchronized void pushResponse(TaskResult taskResult) {
         if (finalized)
             return;
 
-        // TODO implement
+        responseObserver.onNext(taskResult);
     }
 
     public synchronized void notifyCompleted() {
         if (finalized)
             return;
 
-        // TODO implement
+        responseObserver.onCompleted();
+        finalized = true;
     }
 
     public synchronized void pushError(Throwable error) {
