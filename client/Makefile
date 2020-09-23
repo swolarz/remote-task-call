@@ -1,4 +1,7 @@
 
+SERVICE_HOST ?= localhost
+SERVICE_PORT ?= 9090
+
 PROJECT_ROOT := $(shell pwd)
 SRC_ROOT := $(PROJECT_ROOT)/remotetaskcall
 PROTO_ROOT := $(SRC_ROOT)/proto
@@ -21,7 +24,7 @@ start:
 ifndef CLIENT_COMMAND
 	@echo CLIENT_COMMAND env not present
 else
-	@python remotetaskcall/main.py -c "$(CLIENT_COMMAND)"
+	@python remotetaskcall/main.py -c "$(CLIENT_COMMAND)" --host=$(SERVICE_HOST) -p $(SERVICE_PORT)
 endif
 
 install:
