@@ -45,6 +45,8 @@ class RemoteTaskProcess {
     }
 
     public void start() throws IOException {
+        System.out.printf("Starting process with command: %s%n", command);
+
         process = new ProcessBuilder()
                 .command("bash", "-c", command)
                 .directory(new File("/tmp"))
@@ -60,7 +62,7 @@ class RemoteTaskProcess {
         outputFuture = CompletableFuture.runAsync(() -> readStream(outputStream, onOutputStream, "stdout"));
         errorFuture = CompletableFuture.runAsync(() -> readStream(errorStream, onErrorStream, "stderr"));
 
-        CompletableFuture.allOf(outputFuture, errorFuture).thenRunAsync(this::resolveExitStatus);
+        exitFuture = CompletableFuture.allOf(outputFuture, errorFuture).thenRunAsync(this::resolveExitStatus);
 
         started.set(true);
     }
@@ -71,11 +73,13 @@ class RemoteTaskProcess {
             onExit.accept(status);
         }
         catch (InterruptedException e) {
-            e.printStackTrace();
+            System.err.printf("Warning: process (command: '%s') interrupted...%n", command);
         }
+
+        onExit.accept(127);
     }
 
-    private static void readStream(InputStream stream, Consumer<byte[]> consumer, String name) {
+    private void readStream(InputStream stream, Consumer<byte[]> consumer, String name) {
         try (BufferedInputStream bufferedOutput = new BufferedInputStream(stream)) {
             byte[] buffer = new byte[4096];
             int bytesRead = 0;
@@ -87,11 +91,17 @@ class RemoteTaskProcess {
         }
         catch (IOException e) {
             System.err.printf("Warning: unexpected read failure for %s: %s%n", name, e.getMessage());
+            CompletableFuture.runAsync(this::terminate);
+        }
+        catch (Exception e) {
+            System.err.printf("Error: unexpected error during %s read operation: %s%n", name, e.getMessage());
+            CompletableFuture.runAsync(this::terminate);
         }
     }
 
     public void acceptInput(byte[] inputChunk) throws IOException {
         inputStream.write(inputChunk);
+        inputStream.flush();
     }
 
     public void finishInput() throws IOException {

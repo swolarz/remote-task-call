@@ -47,5 +47,13 @@ public class RemoteTaskCallApplication {
 
 			System.err.println("Done.");
 		}));
+
+		try {
+			server.awaitTermination();
+		}
+		catch (InterruptedException e) {
+			System.err.printf("Error: main thread interrupted: %s%n", e.getMessage());
+			System.exit(1);
+		}
 	}
 }

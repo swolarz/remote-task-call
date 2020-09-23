@@ -7,7 +7,7 @@ package pl.put.swolarz.remotetaskcall;
 
 
 service TaskExecutionService {
-    rpc launchTask(stream TaskRequest) returns (stream TaskResult);
+    rpc LaunchTask(stream TaskRequest) returns (stream TaskResult);
 }
 
 message TaskCall {
