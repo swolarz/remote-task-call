@@ -30,6 +30,7 @@ public class RemoteTaskCallApplication {
 
 		try {
 			server.start();
+			System.out.printf("Server started at port: %d%n", port);
 		}
 		catch (IOException e) {
 			System.err.printf("Error: failed to setup rpc server: %s%n", e.getMessage());
